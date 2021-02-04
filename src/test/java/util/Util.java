@@ -1,3 +1,5 @@
+package util;
+
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
@@ -61,9 +63,9 @@ public class Util {
     }
 
     public static String truncateTo2Decimal(float number) {
-        System.out.println("Number before Truncate  "+number);
+        System.out.println("Tax Relief before Truncate  "+number);
         DecimalFormat df = new DecimalFormat("#.##");
-        System.out.println("Truncated decimal  " + df.format(number));
+        System.out.println("Tax Relief after Truncate  " + df.format(number));
         return df.format(number);
     }
 
@@ -82,4 +84,5 @@ public class Util {
         else return taxRelief;
 
     }
+
 }

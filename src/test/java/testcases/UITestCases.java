@@ -1,66 +1,82 @@
 package testcases;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.Color;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
+import pages.CashDispensed;
+import pages.Home;
 import util.Constants;
 import util.Util;
 
-import java.util.List;
-
-
+@Listeners(value = Reporters.class)
 public class UITestCases {
     WebDriver driver;
 
-    @Test
-    public void verifyDispenseSuccessfully() {
+
+    // This is to initialise the driver before test method
+    @BeforeMethod
+    public void setUp() {
+        // Setting up system property to set the path of chrome driver
         System.setProperty("webdriver.chrome.driver",
                 "src/test/resources/chromedriver");
         driver = new ChromeDriver();
-        driver.get("http://localhost:8080/");
+        driver.get(Constants.BASE_URL);
         driver.manage().window().maximize();
-        WebElement dispenseButton;
-        dispenseButton = By.linkText("Dispense Now").findElement(driver);
-        String color = dispenseButton.getCssValue("background-color");
-        String hex = Color.fromString(color).asHex();
-        Assert.assertEquals(hex, "#dc3545");
-        Assert.assertEquals(dispenseButton.getText(), "Dispense Now");
-        dispenseButton.click();
-        Assert.assertEquals(driver.getTitle(), "Dispense!!");
-        WebElement cashDispense = By.cssSelector("div[class='display-4 font-weight-bold']").findElement(driver);
-        Assert.assertEquals(cashDispense.getText(), "Cash dispensed");
-        driver.quit();
+    }
+
+    // This test case covers User Story 5- "As the Governor, I should be able to see a button on the screen so
+//that I can dispense tax relief for my working class heroes"
+
+    @Test
+    public void verifyDispenseSuccessfully() {
+        CashDispensed cashDispensed = new CashDispensed(driver);
+        SoftAssert softAssert = new SoftAssert();
+
+        // It verifies whether the dispense button is in red color or not
+        softAssert.assertEquals(cashDispensed.getDispenseButtonColor(), "#dc3545", "Dispense Button color is not red");
+
+        //It verifies if the button text is Dispense Now
+        softAssert.assertEquals(cashDispensed.getDispenseButtonText(), "Dispense Now", "Button Text is not Dispense Now");
+        cashDispensed.dispenseCash();
+
+        //It verifies if user is directed to page with title Dispense!! and the text displayed on page is Cash Dispensed
+        softAssert.assertEquals(driver.getTitle(), "Dispense!!");
+        softAssert.assertEquals(cashDispensed.cashDispensedMessage(), "Cash dispensed",
+                "User is not directed to a page where it displays cash dispensed");
+        softAssert.assertAll();
 
     }
 
+
+//    This test covers User Story- 3 "As the Clerk, I should be able to upload a csv file to a portal so
+//that I can populate the database from a UI"
+
     @Test
     public void uploadCSVFromUISuccessfully() {
-        System.setProperty("webdriver.chrome.driver",
-                "src/test/resources/chromedriver");
-        driver = new ChromeDriver();
-        driver.get("http://localhost:8080/");
-        driver.manage().window().maximize();
-        WebElement csvUpload = By.cssSelector("input[class='custom-file-input']").findElement(driver);
-        long lineCount;
         try {
             long totalLinesCSV = Util.countLines(Constants.csvFile);
-            WebElement refreshTaxReliefTable = By.cssSelector("button[class='btn btn-primary']").findElement(driver);
-            refreshTaxReliefTable.click();
-            List<WebElement> rows = By.tagName("tr").findElements(driver);
-            int noOfRowsBefore = rows.size();
-            csvUpload.sendKeys("/Users/ankit/Divya/Assignments/NPHCAssignment/src/test/resources/test.csv");
+            Home home = new Home(driver);
+            int noOfRowsBefore = home.getTableRowsCount();
+            home.uploadCSV(System.getProperty("user.dir") + "/src/test/resources/test.csv");
             Thread.sleep(2000);
-            refreshTaxReliefTable.click();
-            List<WebElement> rowsAfter = By.tagName("tr").findElements(driver);
-            Assert.assertEquals(rowsAfter.size(), ((totalLinesCSV - 1) + noOfRowsBefore));
-            Thread.sleep(2000);
+            home.refreshTaxReliefTable();
+            int noOfRowsAfter = home.getTableRowsCount();
+
+//            Verifies if the total no of records after uploading the csv matches total no of existing records in DB + total no of new records uploaded
+            Assert.assertEquals(noOfRowsAfter, ((totalLinesCSV - 1) + noOfRowsBefore), "CSV didn't upload successfully");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    //    After Method annotation is used to quit driver after every test case finished execution
+    @AfterMethod
+    public void tearDown() {
         driver.quit();
     }
 

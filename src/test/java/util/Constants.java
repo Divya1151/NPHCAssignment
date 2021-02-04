@@ -1,7 +1,10 @@
+package util;
+
 public class Constants {
     final public static String singleRecordFile = "src/test/resources/singleRecord.json";
     final public static String multipleRecordFile = "src/test/resources/multipleRecords.json";
     final public static String csvFile = "src/test/resources/test.csv";
+    final public static String BASE_URL = "http://localhost:8080";
 
 
     final public static class EndPoints {
@@ -15,6 +18,7 @@ public class Constants {
     final public static class StatusCodes {
         final public static int statusCode200 = 200;
         final public static int statusCode202 = 202;
+        final public static int statusCode500 = 500;
     }
 
 }
