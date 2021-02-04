@@ -38,4 +38,17 @@ public class Home {
     public int getTableRowsCount(){
        return reliefTableRows.size();
     }
+
+    public String getDispenseButtonColor(){
+        return Color.fromString(dispenseButton.getCssValue("background-color")).asHex();
+    }
+
+    public String getDispenseButtonText(){
+        return dispenseButton.getText();
+    }
+
+    public void dispenseCash(){
+        dispenseButton.click();
+    }
+    
 }

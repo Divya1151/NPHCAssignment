@@ -12,6 +12,7 @@ public class Constants {
         final public static String insertMultipleRecord = "/calculator/insertMultiple";
         final public static String uploadLargeFileForInsertionToDatabase = "/calculator/uploadLargeFileForInsertionToDatabase";
         final public static String getTaxRelief = "/calculator/taxRelief";
+        final public static String getTaxReliefSummary = "calculator/taxReliefSummary"
 
     }
 

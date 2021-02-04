@@ -48,7 +48,9 @@ public class APITestCases {
                 .log().ifValidationFails()
                 .assertThat().statusCode(Constants.StatusCodes.statusCode202)
                 .and()
+                .body(equalTo("Alright"))
                 .header("content-length", equalTo("7"));
+
 
     }
 
@@ -135,6 +137,34 @@ public class APITestCases {
 
     }
 
+    @Test
+    public void verifyInsertSingleRecordWithInvalidSalary() {
+        Employee employeeRecord = new Employee();
+        Gson gson = new Gson();
+        try {
+            employeeRecord = gson.fromJson(new FileReader(Constants.singleRecordFile), Employee.class);
+            employeeRecord.setSalary("$12300");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        given()
+                .baseUri(Constants.BASE_URL)
+                .header("Content-Type", "application/json")
+                .accept("*/*")
+                .body(gson.toJson(employeeRecord))
+                .when()
+                .post(Constants.EndPoints.insertSingleRecord)
+                .then()
+                .log().ifValidationFails()
+                .assertThat().statusCode(Constants.StatusCodes.statusCode500)
+                .and()
+                .body("error", equalTo("Internal Server Error"))
+                .body("message", equalTo(
+                        "Character D is neither a decimal digit number, decimal point, nor \"e\" notation exponential mark."));
+
+    }
+
 
     @Test(threadPoolSize = 5, invocationCount = 20)
     public void insertMultipleRecordSuccessfully() {
@@ -159,6 +189,33 @@ public class APITestCases {
                 .and()
                 .contentType("text/plain;charset=UTF-8")
                 .and()
+                .header("content-length", equalTo("7"));
+
+    }
+
+    @Test(threadPoolSize = 5, invocationCount = 20) // Load Testing
+    public void insertSingleRecordUsingMultipleRecordAPISuccessfully() {
+        Employee employeeRecord = new Employee();
+        ;
+        Gson gson = new Gson();
+        try {
+            employeeRecord = gson.fromJson(new FileReader(Constants.singleRecordFile), Employee.class);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        given()
+                .baseUri(Constants.BASE_URL)
+                .header("Content-Type", "application/json")
+                .accept("*/*")
+                .body(gson.toJson(employeeRecord))
+                .when()
+                .post(Constants.EndPoints.insertMultipleRecord)
+                .then()
+                .assertThat().statusCode(Constants.StatusCodes.statusCode202)
+                .and()
+                .contentType("text/plain;charset=UTF-8")
+                .and()
+                .body(equalTo("Alright"))
                 .header("content-length", equalTo("7"));
 
     }
@@ -249,25 +306,5 @@ public class APITestCases {
     }
 }
 
-//    @Test(dependsOnMethods = {"verifyTaxReliefResponse"})
-//    public void verifyTaxReliefAmount() {
-//
-//        JSONParser parser = new JSONParser();
-//        try {
-//            JSONArray json = (JSONArray) parser.parse(response.body().asString());
-//            for (Object obj : json) {
-//
-//                if (((JSONObject) obj).get("natid").toString().substring(0, 4).equals(natid.substring(0, 4))
-//                        && ((JSONObject) obj).get("name").toString().equals(name)) {
-//                    System.out.println("Tax from query  " + ((JSONObject) obj).get("relief"));
-//                    Assert.assertEquals(((JSONObject) obj).get("relief").toString(), taxRelief);
-//                    System.out.println("Tax Verified Successfully");
-//                }
-//
-//            }
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }}
+
 

@@ -12,25 +12,11 @@ public class CashDispensed {
     @FindBy(css = "div[class='display-4 font-weight-bold']")
     WebElement cashDispensed;
 
-    @FindBy(linkText = "Dispense Now")
-    WebElement dispenseButton;
 
     public CashDispensed(WebDriver driver)
     {
         this.driver = driver;
         PageFactory.initElements(driver,this);
-    }
-
-    public String getDispenseButtonColor(){
-        return Color.fromString(dispenseButton.getCssValue("background-color")).asHex();
-    }
-
-    public String getDispenseButtonText(){
-        return dispenseButton.getText();
-    }
-
-    public void dispenseCash(){
-        dispenseButton.click();
     }
 
     public String cashDispensedMessage(){

@@ -1,5 +1,7 @@
 package testcases;
 
+import com.google.gson.JsonParser;
+import io.restassured.response.Response;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.testng.Assert;
@@ -13,9 +15,13 @@ import pages.Home;
 import util.Constants;
 import util.Util;
 
+import static io.restassured.RestAssured.*;
+
 @Listeners(value = Reporters.class)
 public class UITestCases {
     WebDriver driver;
+    CashDispensed cashDispensed;
+    Home home;
 
 
     // This is to initialise the driver before test method
@@ -27,6 +33,8 @@ public class UITestCases {
         driver = new ChromeDriver();
         driver.get(Constants.BASE_URL);
         driver.manage().window().maximize();
+        cashDispensed = new CashDispensed(driver);
+        home = new Home(driver);
     }
 
     // This test case covers User Story 5- "As the Governor, I should be able to see a button on the screen so
@@ -34,15 +42,14 @@ public class UITestCases {
 
     @Test
     public void verifyDispenseSuccessfully() {
-        CashDispensed cashDispensed = new CashDispensed(driver);
         SoftAssert softAssert = new SoftAssert();
 
         // It verifies whether the dispense button is in red color or not
-        softAssert.assertEquals(cashDispensed.getDispenseButtonColor(), "#dc3545", "Dispense Button color is not red");
+        softAssert.assertEquals(home.getDispenseButtonColor(), "#dc3545", "Dispense Button color is not red");
 
         //It verifies if the button text is Dispense Now
-        softAssert.assertEquals(cashDispensed.getDispenseButtonText(), "Dispense Now", "Button Text is not Dispense Now");
-        cashDispensed.dispenseCash();
+        softAssert.assertEquals(home.getDispenseButtonText(), "Dispense Now", "Button Text is not Dispense Now");
+        home.dispenseCash();
 
         //It verifies if user is directed to page with title Dispense!! and the text displayed on page is Cash Dispensed
         softAssert.assertEquals(driver.getTitle(), "Dispense!!");
@@ -60,7 +67,6 @@ public class UITestCases {
     public void uploadCSVFromUISuccessfully() {
         try {
             long totalLinesCSV = Util.countLines(Constants.csvFile);
-            Home home = new Home(driver);
             int noOfRowsBefore = home.getTableRowsCount();
             home.uploadCSV(System.getProperty("user.dir") + "/src/test/resources/test.csv");
             Thread.sleep(2000);
@@ -74,11 +80,22 @@ public class UITestCases {
         }
     }
 
+//    @Test
+//    public void verifyTaxReliefSummary(){
+//        Response response = given()
+//                .get(Constants.EndPoints.getTaxReliefSummary);
+//
+//        JsonParser
+//
+//    }
+
     //    After Method annotation is used to quit driver after every test case finished execution
     @AfterMethod
     public void tearDown() {
         driver.quit();
     }
+
+
 
 
 }
